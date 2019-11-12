@@ -7,6 +7,8 @@
 #include "std_srvs/Empty.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/PointStamped.h"
+#include "geometry_msgs/Quaternion.h"
+#include "std_msgs/UInt16MultiArray.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/Temperature.h"
 #include "sensor_msgs/MagneticField.h"
@@ -47,7 +49,8 @@ public:
     bool enable_logging_temperature,
     bool enable_logging_magnetic_field,
     bool enable_logging_pressure,
-    bool enable_logging_battery)
+    bool enable_logging_battery,
+    bool enable_logging_pwms)
     : m_cf(link_uri)
     , m_tf_prefix(tf_prefix)
     , m_isEmergency(false)
@@ -62,6 +65,7 @@ public:
     , m_enable_logging_magnetic_field(enable_logging_magnetic_field)
     , m_enable_logging_pressure(enable_logging_pressure)
     , m_enable_logging_battery(enable_logging_battery)
+    , m_enable_logging_pwms(enable_logging_pwms)
     , m_serviceEmergency()
     , m_serviceUpdateParams()
     , m_subscribeCmdVel()
@@ -72,6 +76,7 @@ public:
     , m_pubPressure()
     , m_pubBattery()
     , m_pubRssi()
+    , m_pubPwms()
     , m_sentSetpoint(false)
     , m_sentExternalPosition(false)
   {
@@ -95,6 +100,11 @@ public:
     if (m_enable_logging_battery) {
       m_pubBattery = n.advertise<std_msgs::Float32>(tf_prefix + "/battery", 10);
     }
+
+    if (m_enable_logging_pwms) {
+      m_pubPwms = n.advertise<geometry_msgs::Quaternion>(tf_prefix + "/pwms", 10);
+    }
+
     m_pubRssi = n.advertise<std_msgs::Float32>(tf_prefix + "/rssi", 10);
 
     for (auto& logBlock : m_logBlocks)
@@ -129,6 +139,10 @@ private:
     float baro_temp;
     float baro_pressure;
     float pm_vbat;
+    uint32_t pwm_1;
+    uint32_t pwm_2;
+    uint32_t pwm_3;
+    uint32_t pwm_4;
   } __attribute__((packed));
 
 private:
@@ -292,7 +306,8 @@ private:
       if (   m_enable_logging_temperature
           || m_enable_logging_magnetic_field
           || m_enable_logging_pressure
-          || m_enable_logging_battery)
+          || m_enable_logging_battery
+	  || m_enable_logging_pwms)
       {
         std::function<void(uint32_t, log2*)> cb2 = std::bind(&CrazyflieROS::onLog2Data, this, std::placeholders::_1, std::placeholders::_2);
 
@@ -304,6 +319,10 @@ private:
             {"baro", "temp"},
             {"baro", "pressure"},
             {"pm", "vbat"},
+	    {"pwm","m1_pwm"},
+	    {"pwm","m2_pwm"},
+	    {"pwm","m3_pwm"},
+	    {"pwm","m4_pwm"}
           }, cb2));
         logBlock2->start(10); // 100ms
       }
@@ -428,6 +447,20 @@ private:
       msg.data = data->pm_vbat;
       m_pubBattery.publish(msg);
     }
+
+    if (m_enable_logging_pwms) {
+      geometry_msgs::Quaternion msg;
+
+
+
+
+      msg.x = (float)(data->pwm_1);	
+      msg.y = (float)(data->pwm_2);
+	msg.z = (float)(data->pwm_3);
+	msg.w = (float)(data->pwm_4;
+      m_pubPwms.publish(msg);
+    }
+
   }
 
   void onLogCustom(uint32_t time_in_ms, std::vector<double>* values, void* userData) {
@@ -474,6 +507,7 @@ private:
   bool m_enable_logging_magnetic_field;
   bool m_enable_logging_pressure;
   bool m_enable_logging_battery;
+  bool m_enable_logging_pwms;
 
   ros::ServiceServer m_serviceEmergency;
   ros::ServiceServer m_serviceUpdateParams;
@@ -485,6 +519,7 @@ private:
   ros::Publisher m_pubPressure;
   ros::Publisher m_pubBattery;
   ros::Publisher m_pubRssi;
+  ros::Publisher m_pubPwms;
   std::vector<ros::Publisher> m_pubLogDataGeneric;
 
   bool m_sentSetpoint, m_sentExternalPosition;
@@ -526,7 +561,8 @@ bool add_crazyflie(
     req.enable_logging_temperature,
     req.enable_logging_magnetic_field,
     req.enable_logging_pressure,
-    req.enable_logging_battery);
+    req.enable_logging_battery,
+    req.enable_logging_pwms);
 
   crazyflies[req.uri] = cf;
 

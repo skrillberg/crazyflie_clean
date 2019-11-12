@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="uri" default="radio://0/25/2M/E7E7E7E701" />
-  <arg name="frame" default="/vicon/cf7/cf7" />
-  <arg name="joy_dev" default="/dev/input/js0" />
+  <arg name="uri" default="radio://0/80/2M/E7E7E7E7E7" />
+  <arg name="frame" default="/vicon/CF1/CF1" />
+  <arg name="joy_dev" default="/dev/input/js1" />
   <arg name="x" default="0" />
   <arg name="y" default="0" />
   <arg name="z" default="0.5" />

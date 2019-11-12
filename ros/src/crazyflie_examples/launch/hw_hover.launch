@@ -10,7 +10,7 @@
   <arg name="HY5" value="radio://0/5/2M/FA57CF2018" />
   <arg name="HY6" value="radio://0/6/2M/FA57CF2018" />
   <arg name="HY7" value="radio://0/7/2M/FA57CF2018" />
-
+  <arg name="CF1" value="radio://0/80/2M/E7E7E7E7E7" />
 
 <!-- OLD
   <arg name="uri0" value="radio://0/79/2M/E7E7E7E7E7" />
@@ -22,7 +22,7 @@
   <arg name="uri6" value="radio://0/25/2M/E7E7E7E701" />
   <arg name="uri7" value="radio://0/52/2M/E7E7E7E702" /> -->
 
-  <arg name="uri" default="$(arg HY5)" />
+  <arg name="uri" default="$(arg CF1)" />
 
   <!-- Topics. -->
   <arg name="reference_topic" default="/ref"/>
@@ -35,7 +35,7 @@
   <!-- Frames of reference. -->
   <arg name="fixed_frame" default="world" />
   <arg name="robot_frame" default="crazyflie" />
-  <arg name="mocap_frame" default="HY5/base_link" />
+  <arg name="mocap_frame" default="vicon/CF1/CF1" />
 
   <!-- Takeoff hover point. -->
   <arg name="takeoff_hover_x" default="0.0" />
@@ -171,7 +171,9 @@
     <param name="topics/in_flight" value="$(arg in_flight_topic)" />
   </node>
 
+  
   <!-- Launch RViz with the proper config file robot descriptor. -->
+  <!--	
   <node name="rviz"
         pkg="rviz"
         type="rviz"
@@ -181,5 +183,5 @@
     <param name="robot_description"
            command="$(find xacro)/xacro.py
                     $(find crazyflie_description)/urdf/crazyflie.urdf.xacro" />
-  </node>
+  </node> -->
 </launch>
