@@ -14,6 +14,7 @@
   <arg name="enable_logging_battery" default="True" />
   <arg name="enable_logging_pwms" default="True" />
 
+
   <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
     <param name="uri" value="$(arg uri)" />
     <param name="tf_prefix" value="$(arg tf_prefix)" />
@@ -27,6 +28,12 @@
     <param name="enable_logging_pressure" value="$(arg enable_logging_pressure)" />
     <param name="enable_logging_battery" value="$(arg enable_logging_battery)" />
     <param name="enable_logging_pwms" value="$(arg enable_logging_pwms)" />
+
+    <rosparam>
+      genericLogTopics: ["logPwm"]
+      genericLogTopicFrequencies: [10]
+      genericLogTopic_logPwm_Variables: ["pwm.m1_pwm","pwm.m2_pwm","pwm.m3_pwm","pwm.m4_pwm" ]
+    </rosparam>
 
   </node>
 </launch>

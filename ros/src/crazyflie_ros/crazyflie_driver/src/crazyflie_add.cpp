@@ -1,9 +1,12 @@
 #include "ros/ros.h"
+//AddCrazyflie is a compiled ros service found in AddCrazyflie.srv
 #include "crazyflie_driver/AddCrazyflie.h"
+//LogBlock is a compiled ros service found in LogBlock.srv
 #include "crazyflie_driver/LogBlock.h"
 
 int main(int argc, char **argv)
 {
+  //initialization of crazyflie os node
   ros::init(argc, argv, "crazyflie_add", ros::init_options::AnonymousName);
   ros::NodeHandle n("~");
 
@@ -22,6 +25,7 @@ int main(int argc, char **argv)
   bool enable_logging_battery;
   bool enable_logging_pwms;
 
+  //setting default parameters that can also be specified in crazyflie_add.launch
   n.getParam("uri", uri);
   n.getParam("tf_prefix", tf_prefix);
   n.param("roll_trim", roll_trim, 0.0);
@@ -40,7 +44,11 @@ int main(int argc, char **argv)
   ros::ServiceClient addCrazyflieService = n.serviceClient<crazyflie_driver::AddCrazyflie>("/add_crazyflie");
   addCrazyflieService.waitForExistence();
   ROS_INFO("found /add_crazyflie");
+
+  //add crazyfie object for handling crazyflie configuration
   crazyflie_driver::AddCrazyflie addCrazyflie;
+
+  //setting the relevant request variables in the AddCrazyflie ros service
   addCrazyflie.request.uri = uri;
   addCrazyflie.request.tf_prefix = tf_prefix;
   addCrazyflie.request.roll_trim = roll_trim;

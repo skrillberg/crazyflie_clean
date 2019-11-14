@@ -109,8 +109,8 @@ void StateEstimator::TimerCallback(const ros::TimerEvent& e) {
     tf = tf_buffer_.lookupTransform(
       fixed_frame_id_.c_str(), robot_frame_id_.c_str(), ros::Time(0));
   } catch(tf2::TransformException &ex) {
-    ROS_WARN("%s: %s", name_.c_str(), ex.what());
-    ROS_WARN("%s: Could not determine current state.", name_.c_str());
+    //ROS_WARN("%s: %s", name_.c_str(), ex.what());
+    //ROS_WARN("%s: Could not determine current state.", name_.c_str());
     return;
   }
 

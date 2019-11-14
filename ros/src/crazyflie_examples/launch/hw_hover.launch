@@ -25,6 +25,7 @@
   <arg name="uri" default="$(arg CF1)" />
 
   <!-- Topics. -->
+  <arg name="spin_topic" default="/yawRate"/>
   <arg name="reference_topic" default="/ref"/>
   <arg name="state_topic" default="/state"/>
   <arg name="lqr_control_topic" default="/control/lqr"/>
@@ -156,7 +157,7 @@
   <!-- LQR controller. -->
   <node name="lqr_controller"
         pkg="crazyflie_lqr"
-        type="position_velocity_yaw_state_lift_lqr_node"
+        type="position_velocity_yawRate_state_lift_lqr_node"
         output="screen">
 
     <param name="x_dim" value="$(arg x_dim)" />
@@ -169,6 +170,8 @@
     <param name="topics/state" value="$(arg state_topic)" />
     <param name="topics/control" value="$(arg lqr_control_topic)" />
     <param name="topics/in_flight" value="$(arg in_flight_topic)" />
+    <param name="topics/spin" value="$(arg spin_topic)" />
+
   </node>
 
   

@@ -101,10 +101,11 @@ public:
       m_pubBattery = n.advertise<std_msgs::Float32>(tf_prefix + "/battery", 10);
     }
 
+    /*
     if (m_enable_logging_pwms) {
       m_pubPwms = n.advertise<geometry_msgs::Quaternion>(tf_prefix + "/pwms", 10);
     }
-
+    */
     m_pubRssi = n.advertise<std_msgs::Float32>(tf_prefix + "/rssi", 10);
 
     for (auto& logBlock : m_logBlocks)
@@ -139,12 +140,10 @@ private:
     float baro_temp;
     float baro_pressure;
     float pm_vbat;
-    uint32_t pwm_1;
-    uint32_t pwm_2;
-    uint32_t pwm_3;
-    uint32_t pwm_4;
+
   } __attribute__((packed));
 
+ 
 private:
   bool emergency(
     std_srvs::Empty::Request& req,
@@ -279,6 +278,8 @@ private:
 
     std::unique_ptr<LogBlock<logImu> > logBlockImu;
     std::unique_ptr<LogBlock<log2> > logBlock2;
+    //std::unique_ptr<LogBlock<logPwm> > logBlockPwm;
+
     std::vector<std::unique_ptr<LogBlockGeneric> > logBlocksGeneric(m_logBlocks.size());
     if (m_enableLogging) {
 
@@ -318,11 +319,7 @@ private:
             {"mag", "z"},
             {"baro", "temp"},
             {"baro", "pressure"},
-            {"pm", "vbat"},
-	    {"pwm","m1_pwm"},
-	    {"pwm","m2_pwm"},
-	    {"pwm","m3_pwm"},
-	    {"pwm","m4_pwm"}
+            {"pm", "vbat"}
           }, cb2));
         logBlock2->start(10); // 100ms
       }
@@ -447,7 +444,7 @@ private:
       msg.data = data->pm_vbat;
       m_pubBattery.publish(msg);
     }
-
+    /*
     if (m_enable_logging_pwms) {
       geometry_msgs::Quaternion msg;
 
@@ -459,7 +456,7 @@ private:
 	msg.z = (float)(data->pwm_3);
 	msg.w = (float)(data->pwm_4;
       m_pubPwms.publish(msg);
-    }
+    }*/
 
   }
 

@@ -31,87 +31,65 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * Please contact the author(s) of this library if you have any questions.
- * Authors: David Fridovich-Keil   ( dfk@eecs.berkeley.edu )
+ * Authors: David Fridovich-Keil    ( dfk@eecs.berkeley.edu )
+ *          Jaime Fernandez Fisac   ( jfisac@eecs.berkeley.edu )
  */
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Linear feedback controller that reads in control/references from files.
-// Controllers for specific state spaces will be derived from this class.
+// LQR hover controller for the Crazyflie. Assumes that the state space is
+// given by the PositionVelocityYawStateStamped message type, which is a 7D model but the
+// reference is only a 6D PositionStateStamped message type (appends zero yaw).
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CRAZYFLIE_LQR_LINEAR_FEEDBACK_CONTROLLER_H
-#define CRAZYFLIE_LQR_LINEAR_FEEDBACK_CONTROLLER_H
+#ifndef CRAZYFLIE_LQR_POSITION_VELOCITY_YAWRATE_STATE_LIFT_LQR_H
+#define CRAZYFLIE_LQR_POSITION_VELOCITY_YAWRATE_STATE_LIFT_LQR_H
 
+#include <crazyflie_lqr/linear_feedback_controller.h>
 #include <crazyflie_utils/types.h>
 #include <crazyflie_utils/angles.h>
-#include <crazyflie_msgs/ControlStamped.h>
-
+#include <crazyflie_msgs/PositionVelocityYawStateStamped.h>
+#include <crazyflie_msgs/PositionVelocityStateStamped.h>
+#include "std_msgs/Float64.h"
 #include <ros/ros.h>
-#include <std_msgs/Empty.h>
 #include <math.h>
 #include <fstream>
 
 namespace crazyflie_lqr {
 
-class LinearFeedbackController {
+class PositionVelocityYawRateStateLiftLqr : public LinearFeedbackController {
 public:
-  virtual ~LinearFeedbackController() {}
-
-  // Initialize this class by reading parameters and loading callbacks.
-  virtual bool Initialize(const ros::NodeHandle& n);
-
-  // Compute control given the current state.
-  virtual VectorXd Control(const VectorXd& x) const;
-
-protected:
-  explicit LinearFeedbackController()
-    : received_reference_(false),
-      last_state_time_(-1.0),
-      initialized_(false) {}
-
-  // Load parameters and register callbacks. These may/must be overridden
-  // by derived classes.
-  virtual bool LoadParameters(const ros::NodeHandle& n);
-  virtual bool RegisterCallbacks(const ros::NodeHandle& n) = 0;
-
-  // K matrix and reference state/control (to fight gravity). These are
-  // hard-coded since they will not change.
-  MatrixXd K_;
-  VectorXd u_ref_;
-  VectorXd x_ref_;
-
-  std::string K_filename_;
-  std::string u_ref_filename_;
-
-  // Dimensions of control and state spaces.
-  size_t x_dim_;
-  size_t u_dim_;
-
-  // Remember last time we got a state callback.
-  double last_state_time_;
-
-  // Publishers and subscribers.
-  ros::Subscriber yawRate_sub_;
-  ros::Subscriber state_sub_;
-  ros::Subscriber reference_sub_;
-  ros::Publisher control_pub_;
-
-  std::string state_topic_;
-  std::string reference_topic_;
-  std::string control_topic_;
-  std::string yawRate_topic_;
-
-  // Initialized flag and name.
-  bool received_reference_;
-  bool initialized_;
-  std::string name_;
+  virtual ~PositionVelocityYawRateStateLiftLqr() {}
+  explicit PositionVelocityYawRateStateLiftLqr()
+    : LinearFeedbackController(),
+      x_int_(Vector3d::Zero()),
+      x_int_thresh_(Vector3d::Zero()) {}
 
 private:
-  // Load K, x_ref, u_ref from disk.
-  bool LoadFromDisk();
-}; //\class LinearFeedbackController
+  // Load parameters and register callbacks.
+  bool LoadParameters(const ros::NodeHandle& n);
+  bool RegisterCallbacks(const ros::NodeHandle& n);
+
+  // Process an incoming reference point.
+  void ReferenceCallback(
+    const crazyflie_msgs::PositionVelocityStateStamped::ConstPtr& msg);
+
+  // Process an incoming state measurement.
+  void StateCallback(
+    const crazyflie_msgs::PositionVelocityYawStateStamped::ConstPtr& msg);
+
+  // Process an incoming state measurement.
+  void YawRateCallback(
+    const std_msgs::Float64::ConstPtr& msg);
+
+
+  // Integral of position error.
+  Vector3d x_int_;
+  Vector3d x_int_thresh_;
+  Vector3d integrator_k_;
+  double yaw_rate = 0.0;
+}; //\class PositionVelocityYawRateStateLiftLqr
 
 } //\namespace crazyflie_lqr
 
